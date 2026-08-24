@@ -1,6 +1,7 @@
 from flask import Flask
 from config import Config
 from models import db, Todo
+from routes import todo_bp
 from services.todo_services import display_todos_api
 
 
@@ -8,6 +9,8 @@ app = Flask(__name__)
 app.config.from_object(Config)
 
 db.init_app(app)  # db init
+
+app.register_blueprint(todo_bp)   # blueprint reg
 
 with app.app_context():
     db.create_all()
