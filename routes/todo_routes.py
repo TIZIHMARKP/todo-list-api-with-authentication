@@ -23,7 +23,7 @@ def get_todos():                            # Getting all todos
     return jsonify(result), 200
 
 
-@todo_bp.route('/todos/<int:todo_id>', method = ['GET'])
+@todo_bp.route('/todos/<int:todo_id>', methods = ['GET'])
 def get_todo(todo_id):                        # Getting a todo by id
     todo = get_todo_or_404(todo_id)
 
@@ -36,12 +36,20 @@ def get_todo(todo_id):                        # Getting a todo by id
 
 
 @todo_bp.route('/todos', methods=['POST'])
-def create_todo():
+def create_todo():                          # creating a new todo
 
-    if not request.is_json:
-        return jsonify({"error": "Request should be json"}), 400
+    if not request.is_json:   # ensuring that request is json
+        return jsonify({
+            "error": "Request should be json"
+        }), 400
 
-    data = request.get_json()
+    try: 
+        
+        data = request.get_json()
+    except Exception as e:
+        return jsonify({
+            "error": f"You have invalid json: {str(e)}"
+        }), 400
 
     title = data.get('title')    # validating title
     if not title:
@@ -62,5 +70,68 @@ def create_todo():
     db.session.commit()
     
     return jsonify(new_todo.to_dict()), 201
+
+
+@todo_bp.route('/todos/<int:todo_id>', methods=['PUT'])
+def update_todo(todo_id):                            # Updating a todo by ID
+
+    todo = get_todo_or_404(todo_id)
+    if todo is None:
+        return jsonify({
+            "error": f"Not found todo with id {todo_id}"
+        }), 404
+    
+    if not request.is_json:  
+        return jsonify({
+            "error": "Request should be json"
+        }), 400
+    
+    data = request.get_json() 
+
+    if 'title' in data:
+        todo.title = data['title']
+
+    if 'description' in data:
+        todo.description = data['description']
+
+    if 'completed' in data:
+        todo.completed = data['completed']
+    
+    db.session.commit()
+    
+    return jsonify(todo.to_dict()), 200
+
+
+@todo_bp.route('/todos/<int:todo_id>', methods=['DELETE'])
+def delete_todo(todo_id):                              # Deleting a todo   
+
+    todo = get_todo_or_404(todo_id)
+
+    if todo is None:
+        return jsonify({
+            "error": f"Not found todo with id {todo_id}"
+        }), 404
+    
+    db.session.delete(todo)
+    db.session.commit()
+    
+    return jsonify({
+        "message": f"Success deleting todo {todo_id}"
+    }), 200
+
+
+@todo_bp.route('/todos/completed', methods=['GET'])
+def get_completed_todos():                             # Getting completed todos
+
+    todos = Todo.query.filter_by(
+        completed=True
+    ).all()
+
+    result = []
+    for todo in todos:
+        result.append(todo.to_dict())
+
+    return jsonify(result), 200
+
 
 
