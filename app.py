@@ -10,10 +10,11 @@ db.init_app(app)  # db init
 
 with app.app_context():
     db.create_all()
+    print("Success creating database tables")
 
 @app.route('/')
 def index():
-    return "TodoList API is running on port 8082"
+    return {"message": "TodoList API is running on port 8082"}
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8082, debug=True)
