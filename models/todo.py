@@ -11,4 +11,10 @@ class Todo(db.Model):
     def __repr__(self):
         return f"<Todo {self.id}: {self.title}"
 
-    
+    def to_dict(self):   # converting todo to dictionary to return json
+        return {
+            'id': self.id,
+            'title': self.title,
+            'description': self.description,
+            'completed': self.completed
+        }
