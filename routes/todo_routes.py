@@ -35,5 +35,32 @@ def get_todo(todo_id):                        # Getting a todo by id
     return jsonify(todo.to_dict()), 200
 
 
+@todo_bp.route('/todos', methods=['POST'])
+def create_todo():
+
+    if not request.is_json:
+        return jsonify({"error": "Request should be json"}), 400
+
+    data = request.get_json()
+
+    title = data.get('title')    # validating title
+    if not title:
+        return jsonify({"error": "Title must be present"}), 400
+
+    description = data.get('description', '')  # optional
+    completed = data.get('completed', False)
+
+    new_todo = Todo(
+        title=title,
+
+        description=description,
+
+        completed=completed
+    )
+    
+    db.session.add(new_todo)
+    db.session.commit()
+    
+    return jsonify(new_todo.to_dict()), 201
 
 
