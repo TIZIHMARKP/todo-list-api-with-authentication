@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from models import db, Todo
+from utils.auth import auth 
 
 todo_bp = Blueprint('todo', __name__, url_prefix='/api')
 
@@ -13,6 +14,7 @@ def get_todo_or_404(todo_id):
     return todo
 
 @todo_bp.route('/todos', methods = ['GET'])
+@auth.login_required
 def get_todos():                            # Getting all todos
     todos = Todo.query.all()
 
@@ -24,6 +26,7 @@ def get_todos():                            # Getting all todos
 
 
 @todo_bp.route('/todos/<int:todo_id>', methods = ['GET'])
+@auth.login_required
 def get_todo(todo_id):                        # Getting a todo by id
     todo = get_todo_or_404(todo_id)
 
@@ -36,6 +39,7 @@ def get_todo(todo_id):                        # Getting a todo by id
 
 
 @todo_bp.route('/todos', methods=['POST'])
+@auth.login_required
 def create_todo():                          # creating a new todo
 
     if not request.is_json:   # ensuring that request is json
@@ -73,6 +77,7 @@ def create_todo():                          # creating a new todo
 
 
 @todo_bp.route('/todos/<int:todo_id>', methods=['PUT'])
+@auth.login_required
 def update_todo(todo_id):                            # Updating a todo by ID
 
     todo = get_todo_or_404(todo_id)
@@ -103,6 +108,7 @@ def update_todo(todo_id):                            # Updating a todo by ID
 
 
 @todo_bp.route('/todos/<int:todo_id>', methods=['DELETE'])
+@auth.login_required
 def delete_todo(todo_id):                              # Deleting a todo   
 
     todo = get_todo_or_404(todo_id)
@@ -121,6 +127,7 @@ def delete_todo(todo_id):                              # Deleting a todo
 
 
 @todo_bp.route('/todos/completed', methods=['GET'])
+@auth.login_required
 def get_completed_todos():                             # Getting completed todos
 
     todos = Todo.query.filter_by(
