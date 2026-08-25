@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from models import db, Todo
 from utils.auth import auth 
+from utils.logger import log_info, log_error
 
 todo_bp = Blueprint('todo', __name__, url_prefix='/api')
 
@@ -70,10 +71,24 @@ def create_todo():                          # creating a new todo
         completed=completed
     )
     
-    db.session.add(new_todo)
-    db.session.commit()
-    
-    return jsonify(new_todo.to_dict()), 201
+
+    try:
+
+        db.session.add(new_todo)
+        db.session.commit()
+
+        log_info(f"Todo has been created: id = {new_todo.id}, Title = '{title}'")
+
+        return jsonify(new_todo.to_dict()), 201
+
+    except Exception as e:
+        db.session.rollback()
+        log_error(f"failed to create todo: {str(e)}")
+
+        return jsonify({
+            "error": f"DB error: {str(e)}"
+        }), 500
+        
 
 
 @todo_bp.route('/todos/<int:todo_id>', methods=['PUT'])
@@ -114,12 +129,15 @@ def delete_todo(todo_id):                              # Deleting a todo
     todo = get_todo_or_404(todo_id)
 
     if todo is None:
+        log_error(f"failed to delete todo: The todo with the id {todo.id} is not found")
         return jsonify({
             "error": f"Not found todo with id {todo_id}"
         }), 404
     
     db.session.delete(todo)
     db.session.commit()
+
+    log_info(f"Deleted todo: id = {todo_id}, title = {todo.title}")
     
     return jsonify({
         "message": f"Success deleting todo {todo_id}"
