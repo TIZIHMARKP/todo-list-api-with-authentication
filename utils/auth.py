@@ -1,11 +1,17 @@
 
 from flask_httpauth import HTTPBasicAuth
 from flask import jsonify
+import os
 
 auth = HTTPBasicAuth()
 
+# reading env credentials, just for better security practices
+USERNAME = os.getenv('BASIC_AUTH_USERNAME', 'admin')
+PASSWORD = os.getenv('BASIC_AUTH_PASSWORD', 'secret')
+
 USERS = {                       # hardcoded credentials
-    "admin": "secret"
+    # "admin": "secret"
+    USERNAME: PASSWORD
 }
 
 @auth.verify_password
