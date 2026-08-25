@@ -12,7 +12,7 @@ logging.basicConfig(
 
 def log_request():
    
-    logging.info(f"Method: {request.method} PATH: {request.path}  IP: {request.remote_addr}")
+    logging.info(f"Method: {request.method} PATH: {request.path} ")    # Logging Method and Path to app.log
 
 def log_error(message):
 
